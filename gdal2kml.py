@@ -60,108 +60,110 @@ def create_tile(source, filename, offset, size):
 	mem_ds = None
 	
 	return result
+
+def create_kml(source, filename, directory, tile_size=1024, border=0, name=None, order=20, exclude=[]):
+	img = gdal.Open(source)
+	img_size = [img.RasterXSize, img.RasterYSize]
+
+	logging.debug('Image size: %s' % img_size)
+
+	cropped_size = [ x - border * 2 for x in img_size ]
+
+	base, ext = os.path.splitext(os.path.basename(source))
+
+	if not name: name = base
+	path = os.path.relpath(directory, os.path.dirname(filename))
+
+	tile_layout = tiles(cropped_size, tile_size)
+
+	tile_sizes = [ int(math.ceil(x)) for x in [ cropped_size[0] / tile_layout[0], cropped_size[1] / tile_layout[1] ] ]
+	logging.debug('Using tile layout %s -> %s' % (tile_layout, tile_sizes))
+
+	bob = open(filename, 'w')
 	
-usage = "usage: %prog [options] src_file dst_file"
-parser = OptionParser(usage)
-parser.add_option('-d', '--dir', dest='working', help='Where to create jpeg tiles')
-parser.add_option('-c', '--crop', default=0, dest='border', type='int', help='Crop border')
-parser.add_option('-n', '--name', dest='name', help='KML folder name for output')
-parser.add_option('-o', '--draw-order', dest='order', type='int', default=20, help='KML draw order')
-parser.add_option('-t', '--tile-size', dest='tile_size', default=1024, type='int', help='Max tile size [1024]')
-parser.add_option('-v', '--verbose', dest='verbose', action='store_true', help='Verbose output')
-
-options, args = parser.parse_args()
-
-if len(args) != 2: parser.error('Missing file paths')
-source, dest = args
-
-if options.verbose: logging.basicConfig(level=logging.DEBUG)
-
-# validate a few options
-if not os.path.exists(source): parser.error('unable to file src_file')
-#if options.scale<10 or options.scale>150: parser.error('scale must be between 10% and 150%')
-
-# set the default folder for jpegs
-if not options.working: options.working = "%s.files" % os.path.splitext(dest)[0]
-logging.info('Writing jpegs to %s' % options.working)
-
-img = gdal.Open(source);
-img_size = [img.RasterXSize, img.RasterYSize]
-
-logging.debug('Image size: %s' % img_size)
-
-cropped_size = [ x - options.border * 2 for x in img_size ]
-
-base, ext = os.path.splitext(os.path.basename(source))
-
-if not options.name: options.name = base
-if not options.order: options.order = 20
-
-if not os.path.exists(options.working): os.mkdir(options.working)
-path = os.path.relpath(options.working, os.path.dirname(dest))
-
-tile_layout = tiles(cropped_size)
-
-tile_sizes = [ int(math.ceil(x)) for x in [ cropped_size[0] / tile_layout[0], cropped_size[1] / tile_layout[1] ] ]
-logging.debug('Using tile layout %s -> %s' % (tile_layout, tile_sizes))
-
-# load the exclude file
-exclude_file = source + ".exclude"
-exclude = []
-if os.path.exists(exclude_file):
-  logging.debug("Using exclude file %s" % exclude_file)
-  for line in open(exclude_file):
-    exclude.append(line.rstrip())
-  logging.debug(exclude)
-
-bob = open(dest, 'w')
-	
-bob.write("""<?xml version="1.0" encoding="UTF-8"?>
+	bob.write("""<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
   <Folder>
-    <name>%(name)s</name>
-""" % options.__dict__)
+    <name>%s</name>
+""" % name)
 
-for t_y in range(tile_layout[1]):
-  for t_x in range(tile_layout[0]):
-    tile = "%d,%d" % (t_y, t_x)
-    logging.debug(tile)
-    if tile in exclude:
-      logging.debug("Excluding tile %s" % tile)
-    else:
-      src_corner = (int(options.border + t_x * tile_sizes[0]), int(options.border + t_y * tile_sizes[1]))
-      src_size = [tile_sizes[0], tile_sizes[1]]
-      if src_corner[0] + tile_sizes[0] > img_size[0] - options.border: src_size[0] = int(tile_sizes[0])
-      if src_corner[1] + tile_sizes[1] > img_size[1] - options.border: src_size[1] = int(tile_sizes[1])
-      
-      outfile = "%s_%d_%d.jpg" % (base, t_x, t_y)
-      bounds = create_tile(img, "%s/%s" % (options.working, outfile), src_corner, src_size)
+	for t_y in range(tile_layout[1]):
+		for t_x in range(tile_layout[0]):
+			tile = "%d,%d" % (t_y, t_x)
+			logging.debug(tile)
+			if tile in exclude:
+				logging.debug("Excluding tile %s" % tile)
+			else:
+				src_corner = (border + t_x * tile_sizes[0], border + t_y * tile_sizes[1])
+				src_size = [ tile_sizes[0], tile_sizes[1] ]
+				if src_corner[0] + tile_sizes[0] > img_size[0] - options.border: src_size[0] = int(tile_sizes[0])
+				if src_corner[1] + tile_sizes[1] > img_size[1] - options.border: src_size[1] = int(tile_sizes[1])
+				
+				outfile = "%s_%d_%d.jpg" % (base, t_x, t_y)
+				bounds = create_tile(img, "%s/%s" % (directory, outfile), src_corner, src_size)
+				
+				bob.write("""    <GroundOverlay>
+				<name>%s</name>
+				<color>ffffffff</color>
+				<drawOrder>%d</drawOrder>
+				<Icon>
+					<href>%s/%s</href>
+					<viewBoundScale>0.75</viewBoundScale>
+				</Icon>
+				<LatLonBox>
+	""" % (outfile, order, path, outfile))
 			
-      bob.write("""    <GroundOverlay>
-      <name>%s</name>
-      <color>ffffffff</color>
-      <drawOrder>%d</drawOrder>
-      <Icon>
-        <href>%s/%s</href>
-        <viewBoundScale>0.75</viewBoundScale>
-      </Icon>
-      <LatLonBox>
-""" % (outfile, options.order, path, outfile))
-    
-      bob.write("""        <north>%(north)s</north>
-        <south>%(south)s</south>
-        <east>%(east)s</east>
-        <west>%(west)s</west>
-        <rotation>0</rotation>
-""" % bounds)
-      bob.write("""        </LatLonBox>
-    </GroundOverlay>
-""");
-  
-bob.write("""  </Folder>
-</kml>
-""")
+				bob.write("""        <north>%(north)s</north>
+					<south>%(south)s</south>
+					<east>%(east)s</east>
+					<west>%(west)s</west>
+					<rotation>0</rotation>
+	""" % bounds)
+				bob.write("""        </LatLonBox>
+			</GroundOverlay>
+	""");
+		
+	bob.write("""  </Folder>
+	</kml>
+	""")
 
-bob.close()
-img = None
-    
+	bob.close()
+	img = None
+	
+if __name__=='__main__':
+	usage = "usage: %prog [options] src_file dst_file"
+	parser = OptionParser(usage)
+	parser.add_option('-d', '--dir', dest='directory', help='Where to create jpeg tiles')
+	parser.add_option('-c', '--crop', default=0, dest='border', type='int', help='Crop border')
+	parser.add_option('-n', '--name', dest='name', help='KML folder name for output')
+	parser.add_option('-o', '--draw-order', dest='order', type='int', default=20, help='KML draw order')
+	parser.add_option('-t', '--tile-size', dest='tile_size', default=1024, type='int', help='Max tile size [1024]')
+	parser.add_option('-v', '--verbose', dest='verbose', action='store_true', help='Verbose output')
+
+	options, args = parser.parse_args()
+
+	if len(args) != 2: parser.error('Missing file paths')
+	source, dest = args
+
+	if options.verbose: logging.basicConfig(level=logging.DEBUG)
+
+	# validate a few options
+	if not os.path.exists(source): parser.error('unable to file src_file')
+	#if options.scale<10 or options.scale>150: parser.error('scale must be between 10% and 150%')
+
+	# set the default folder for jpegs
+	if not options.directory: options.directory = "%s.files" % os.path.splitext(dest)[0]
+	if not os.path.exists(options.directory): os.mkdir(options.directory)
+	logging.info('Writing jpegs to %s' % options.directory)
+
+	# load the exclude file
+	exclude_file = source + ".exclude"
+	exclude = []
+	if os.path.exists(exclude_file):
+		logging.debug("Using exclude file %s" % exclude_file)
+		for line in open(exclude_file):
+			exclude.append(line.rstrip())
+		logging.debug(exclude)
+		
+	create_kml(source, dest, options.directory, 
+		tile_size=options.tile_size, border=options.border, name=options.name, order=options.order, exclude=exclude)
