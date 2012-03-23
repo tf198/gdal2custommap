@@ -23,7 +23,7 @@ Requirements
 ------------
 You need the GDAL library and Python bindings installed. On Ubuntu
 its as simple as
-::
+
 	sudo apt-get install python-gdal
 	
 For windows there are prebuilt binaries at http://www.gisinternals.com
@@ -39,7 +39,7 @@ following packagesbut it can be a bit tricky to get all the paths right...
 
 Basic Usage
 -----------
-::
+
   python gdal2kml.py input.tif my_map.kml
 	python kml2kmz.py my_map.kml
 	
