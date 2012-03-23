@@ -80,41 +80,6 @@ if not options.order: options.order = options.scale / 5
 if not os.path.exists(options.working): os.mkdir(options.working)
 path = os.path.relpath(options.working, os.path.dirname(dest))
 
-#m_x = math.ceil(cropped_size[0] / factor)
-#m_y = math.ceil(cropped_size[1] / factor)
-
-#m = [ cropped_size[0] / factor, cropped_size[1] / factor ]
-#logging.debug("Ideal tiles: %s" % m)
-#d = [ list(math.modf(x)) for x in m ]
-#print d
-#for p in d:
-#	if p[0] > 0.5:
-#		p[0] = 1 - p[0]
-#		p[1] += 1
-#print d
-#if d[0][0] < d[1][0]:
-#	# x is best fit
-#	t_x = cropped_size[0] / d[0][1]
-
-# special case for where a single tile can be created
-#pixel_size = cropped_size[0] * cropped_size[1]
-#if pixel_size <= factor**2:
-#  logging.debug('Outputing to single tile')
-#  m_y = 1.0
-#  m_x = 1.0
-#  options.single = True
-
-#if options.single and pixel_size > factor**2: # need to downscale
-#  options.scale = int(factor**2 * 100 / pixel_size)
-#  m_y = 1.0
-#  m_x = 1.0
-
-#print factor, options.scale
-
-# equalise the tiles
-#tile_sizes[0] = cropped_size[0] / m_x
-#tile_sizes[1] = cropped_size[1] / m_y
-
 tile_layout = tiles(cropped_size)
 
 tile_sizes = [ int(math.ceil(x)) for x in [ cropped_size[0] / tile_layout[0], cropped_size[1] / tile_layout[1] ] ]
