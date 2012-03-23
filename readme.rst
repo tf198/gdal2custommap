@@ -6,7 +6,7 @@ geo-referenced images.
 Garmin CustomMap has some restrictions on the KMZ it can display
 
 1. No tile larger than 1024x1024 (or equivalent total pixels)
-2. No more than 100 tiles on the device e.g. 2 KMZ files with 50 tiles each
+2. No more than 100 tiles on the device (e.g. 4 KMZ files with 25 tiles each)
 
 gdal2tiles (the GDAL default tiler) uses 256x256 tiles so requires 4 times
 as many tiles as necessary.  gdal2kml tries to tile the map as efficiently
