@@ -46,6 +46,7 @@ def create_tile(source, filename, offset, size):
     jpeg_ds = jpeg_drv.CreateCopy(filename, mem_ds, strict=0)
 
     t = source.GetGeoTransform()
+    if t[2]!=0 or t[4]!=0: raise Exception("Source projection not compatible")
     def transform((x, y)):
         return ( t[0] + x*t[1] + y*t[2], t[3] + x*t[4] + y*t[5] )
     
