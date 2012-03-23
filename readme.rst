@@ -42,38 +42,34 @@ Basic Usage
 ::
 
   python gdal2kml.py input.tif my_map.kml
-	python kml2kmz.py my_map.kml
+  python kml2kmz.py my_map.kml
 	
 gdal2kml.py
 -----------
-::
+Usage: gdal2kml.py [options] src_file dst_file
 
-	Usage: gdal2kml.py [options] src_file dst_file
-
-	Options:
-		-h, --help            show this help message and exit
-		-d DIRECTORY, --dir=DIRECTORY
-													Where to create jpeg tiles
-		-c BORDER, --crop=BORDER
-													Crop border
-		-n NAME, --name=NAME  KML folder name for output
-		-o ORDER, --draw-order=ORDER
-													KML draw order
-		-t TILE_SIZE, --tile-size=TILE_SIZE
-													Max tile size [1024]
-		-v, --verbose         Verbose output
+Options:
+	-h, --help            show this help message and exit
+	-d DIRECTORY, --dir=DIRECTORY
+												Where to create jpeg tiles
+	-c BORDER, --crop=BORDER
+												Crop border
+	-n NAME, --name=NAME  KML folder name for output
+	-o ORDER, --draw-order=ORDER
+												KML draw order
+	-t TILE_SIZE, --tile-size=TILE_SIZE
+												Max tile size [1024]
+	-v, --verbose         Verbose output
 
 kml2kmz.py
 ----------
-::
+Usage: kml2kmz.py [options] <kml>
 
-	Usage: kml2kmz.py [options] <kml>
-
-	Options:
-		-h, --help            show this help message and exit
-		-o FILE, --outfile=FILE
-													Write output to FILE
-		-v, --verbose         Verbose output
+Options:
+	-h, --help            show this help message and exit
+	-o FILE, --outfile=FILE
+												Write output to FILE
+	-v, --verbose         Verbose output
 
 
 
