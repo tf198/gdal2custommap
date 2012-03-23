@@ -12,7 +12,6 @@ its as simple as
 
 gdal2kml.py
 -----------
-::
 	Usage: gdal2kml.py [options] src_file dst_file
 
 	Options:
@@ -30,7 +29,6 @@ gdal2kml.py
 
 kml2kmz.py
 ----------
-::
 	Usage: kml2kmz.py [options] <kml>
 
 	Options:
