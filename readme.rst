@@ -8,13 +8,13 @@ Garmin CustomMap has some restrictions on the KMZ it can display
 1. No tile larger than 1024x1024 (or equivalent total pixels)
 2. No more than 100 tiles on the device (e.g. 4 KMZ files with 25 tiles each)
 
-gdal2tiles (the GDAL default tiler) uses 256x256 tiles so requires 4 times
-as many tiles as necessary.  gdal2kml tries to tile the map as efficiently
+``gdal2tiles`` (the GDAL default tiler) uses 256x256 tiles so requires 4 times
+as many tiles as necessary.  ``gdal2kml`` tries to tile the map as efficiently
 as possible so you dont end up with thin tiles at the right or bottom.
 
-gdal2kml **DOES NOT** do any warping so the source image must be WGS84 (or compatible
+``gdal2kml`` **DOES NOT** do any warping so the source image must be WGS84 (or compatible
 e.g. GDA94) or the conversion will fail.  Fo other projections you need to get the GDAL
-utility programs and run it through gdal_warp first.  This will probably introduce a black border
+utility programs and run it through ``gdal_warp`` first.  This will probably introduce a black border
 which you can then cut out using the --crop option to gdal2kml.
 ::
 	gdalwarp -t_srs "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" -rb <input.tif> <corrected.tif>
