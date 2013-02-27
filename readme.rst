@@ -17,8 +17,8 @@ projection or the conversion will fail.
 For other projections you need to get the GDAL utility programs and run it through ``gdal_warp`` first.  If you
 are not sure about the projection run it through anyway as it will not adversly affect the output.
 This may introduce a black border which you can then cut out using the --crop option to gdal2kml.
-
 ::
+
 	gdalwarp -t_srs EPSG:4326 -r cubic <input.tif> <corrected.tif>
 	gdal2kml.py corrected.tif output.kml --crop 20
 
@@ -62,7 +62,7 @@ Options:
 												KML draw order
 	-t TILE_SIZE, --tile-size=TILE_SIZE
 												Max tile size [1024]
-   -q, --quality=X       JPEG output quality 0-100 [75]
+	-q QUALITY, --quality=QUALITY       JPEG output quality 0-100 [75]
 	-v, --verbose         Verbose output
 
 kml2kmz.py
