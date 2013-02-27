@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os, math, re, sys, subprocess, logging
 from optparse import OptionParser
 from osgeo import gdal        
@@ -31,7 +33,7 @@ def tiles(canvas, target=1024):
     results.sort(key=lambda x: x[2])
     return [ int(x) for x in results[0][0:2] ]
 
-def create_tile(source, filename, offset, size):
+def create_tile(source, filename, offset, size, quality=75):
     """
     Create a jpeg of the given area and return the bounds.
     """
@@ -43,7 +45,7 @@ def create_tile(source, filename, offset, size):
     mem_ds.WriteRaster(0, 0, size[0], size[1], data, band_list=bands)
 
     jpeg_drv = gdal.GetDriverByName('JPEG')
-    jpeg_ds = jpeg_drv.CreateCopy(filename, mem_ds, strict=0)
+    jpeg_ds = jpeg_drv.CreateCopy(filename, mem_ds, strict=0, options=["QUALITY={}".format(quality)])
 
     t = source.GetGeoTransform()
     if t[2]!=0 or t[4]!=0: raise Exception("Source projection not compatible")
@@ -65,7 +67,7 @@ def create_tile(source, filename, offset, size):
     
     return result
 
-def create_kml(source, filename, directory, tile_size=1024, border=0, name=None, order=20, exclude=[]):
+def create_kml(source, filename, directory, tile_size=1024, border=0, name=None, order=20, exclude=[], quality=75):
     """
     Create a kml file and associated images for the given georeferenced image 
     """
@@ -107,7 +109,7 @@ def create_kml(source, filename, directory, tile_size=1024, border=0, name=None,
                 if src_corner[1] + tile_sizes[1] > img_size[1] - options.border: src_size[1] = int(tile_sizes[1])
                 
                 outfile = "%s_%d_%d.jpg" % (base, t_x, t_y)
-                bounds = create_tile(img, "%s/%s" % (directory, outfile), src_corner, src_size)
+                bounds = create_tile(img, "%s/%s" % (directory, outfile), src_corner, src_size, quality)
                 
                 bob.write("""    <GroundOverlay>
                 <name>%s</name>
@@ -145,6 +147,7 @@ if __name__=='__main__':
     parser.add_option('-n', '--name', dest='name', help='KML folder name for output')
     parser.add_option('-o', '--draw-order', dest='order', type='int', default=20, help='KML draw order')
     parser.add_option('-t', '--tile-size', dest='tile_size', default=1024, type='int', help='Max tile size [1024]')
+    parser.add_option('-q', '--quality', dest='quality', default=75, type='int', help='JPEG quality [75]')
     parser.add_option('-v', '--verbose', dest='verbose', action='store_true', help='Verbose output')
 
     options, args = parser.parse_args()
@@ -173,4 +176,4 @@ if __name__=='__main__':
         logging.debug(exclude)
         
     create_kml(source, dest, options.directory, 
-        tile_size=options.tile_size, border=options.border, name=options.name, order=options.order, exclude=exclude)
+        tile_size=options.tile_size, border=options.border, name=options.name, order=options.order, exclude=exclude, quality=options.quality)

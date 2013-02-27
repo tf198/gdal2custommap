@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import re, logging
 
 def htc(m):

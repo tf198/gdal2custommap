@@ -12,13 +12,15 @@ Garmin CustomMap has some restrictions on the KMZ it can display
 as many tiles as necessary.  ``gdal2kml`` tries to tile the map as efficiently
 as possible so you dont end up with thin tiles at the right or bottom.
 
-``gdal2kml`` **DOES NOT** do any warping so the source image must be WGS84 (or compatible
-e.g. GDA94) or the conversion will fail.  Fo other projections you need to get the GDAL
-utility programs and run it through ``gdal_warp`` first.  This will probably introduce a black border
-which you can then cut out using the --crop option to gdal2kml.
+``gdal2kml`` **DOES NOT** do any warping so the source image must be correctly georeferenced and in ``EPSG:4326``
+projection or the conversion will fail.  
+For other projections you need to get the GDAL utility programs and run it through ``gdal_warp`` first.  If you
+are not sure about the projection run it through anyway as it will not adversly affect the output.
+This may introduce a black border which you can then cut out using the --crop option to gdal2kml.
+
 ::
-	gdalwarp -t_srs "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs" -rb <input.tif> <corrected.tif>
-	python gdal2kml.py corrected.tif output.kml --crop 20
+	gdalwarp -t_srs EPSG:4326 -r cubic <input.tif> <corrected.tif>
+	gdal2kml.py corrected.tif output.kml --crop 20
 
 Requirements
 ------------
@@ -60,6 +62,7 @@ Options:
 												KML draw order
 	-t TILE_SIZE, --tile-size=TILE_SIZE
 												Max tile size [1024]
+   -q, --quality=X       JPEG output quality 0-100 [75]
 	-v, --verbose         Verbose output
 
 kml2kmz.py
