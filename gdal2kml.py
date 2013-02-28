@@ -45,7 +45,7 @@ def create_tile(source, filename, offset, size, quality=75):
     mem_ds.WriteRaster(0, 0, size[0], size[1], data, band_list=bands)
 
     jpeg_drv = gdal.GetDriverByName('JPEG')
-    jpeg_ds = jpeg_drv.CreateCopy(filename, mem_ds, strict=0, options=["QUALITY={}".format(quality)])
+    jpeg_ds = jpeg_drv.CreateCopy(filename, mem_ds, strict=0, options=["QUALITY={0}".format(quality)])
 
     t = source.GetGeoTransform()
     if t[2]!=0 or t[4]!=0: raise Exception("Source projection not compatible")
